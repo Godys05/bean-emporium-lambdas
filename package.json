@@ -10,6 +10,9 @@
     "webpack-cli": "^5.0.1"
   },
   "scripts": {
-    "build": "npx webpack --config webpack.config.js"
+    "build-authorizer": "npx webpack --config ./authorizer/webpack.config.js && zip -r output.zip dist && aws lambda update-function-code --function-name BeanAuthorizer --zip-file fileb://output.zip",
+    "build-orders": "npx webpack --config ./orders/webpack.config.js && zip -r output.zip dist && aws lambda update-function-code --function-name BeanOrders --zip-file fileb://output.zip",
+    "build-products": "npx webpack --config ./products/webpack.config.js && zip -r output.zip dist && aws lambda update-function-code --function-name BeanProducts --zip-file fileb://output.zip",
+    "build-users": "npx webpack --config ./users/webpack.config.js && zip -r output.zip dist && aws lambda update-function-code --function-name BeanUsers --zip-file fileb://output.zip"
   }
 }
