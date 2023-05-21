@@ -1,12 +1,13 @@
 // TODO
 // - Handle error codes and add constraints
-import * as AWS from "aws-sdk";
 import {
   APIGatewayProxyEvent,
   APIGatewayProxyResult,
   Context,
 } from "aws-lambda";
 import { User } from "../types";
+import * as AWS from "aws-sdk";
+
 const docClient = new AWS.DynamoDB.DocumentClient();
 const userUpdatableProperties = ["name", "email"];
 
@@ -94,7 +95,7 @@ export const handler = async (
         break;
     }
 
-    if (Object.keys(data.data).length === 0) {
+    if (Object.keys(data).length === 0) {
       return { statusCode: 404, body: "User with given ID not found" };
     }
     return { body: JSON.stringify(data), statusCode: 200 };

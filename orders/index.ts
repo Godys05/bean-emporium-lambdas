@@ -9,7 +9,7 @@ export const handler = async (
   context: Context
 ): Promise<APIGatewayProxyResult> => {
   return {
-    body: JSON.stringify({ message: "Hello from orders", data: event.body }),
+    body: JSON.stringify({ message: "Hello from orders", data: event.httpMethod }),
     statusCode: 200,
   };
 };
