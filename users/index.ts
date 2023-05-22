@@ -25,7 +25,13 @@ const getUser = async (id: string) => {
   }
 };
 
-const createUser = async (user: Partial<User>) => {
+const createUser = async (id: string, email: string, name: string) => {
+  const user: User = {
+    id,
+    email,
+    name,
+    cart: [],
+  };
   try {
     const params = {
       TableName: "BeanUsers",
@@ -77,27 +83,32 @@ export const handler = async (
 ): Promise<APIGatewayProxyResult> => {
   // Endpoints to create:
   // /users
-  //     POST
+  //     POST *
   //     /{id}
-  //         GET
-  //         PATCH
+  //         GET *
+  //         PATCH *
   //         /cart
   //             GET
   //             PUT
   let data: any = {};
   const method = event.httpMethod;
-  let user;
   try {
     switch (method) {
       case "GET":
         data = await getUser(event.pathParameters!.id!);
         break;
       case "POST":
-        user = JSON.parse(event.body!).user;
-        data = await createUser(user);
+        const { email, name, id } = JSON.parse(event.body!)
+          .userData as Partial<User>;
+        if (!email || !name || !id)
+          return {
+            statusCode: 400,
+            body: "Please provide body in format '{ 'userData': { 'email':string, 'name':string, 'id':string } }'",
+          };
+        data = await createUser(id, email, name);
         break;
       case "PATCH":
-        user = JSON.parse(event.body!).user;
+        const user = JSON.parse(event.body!).user;
         data = await updateUser(event.pathParameters!.id!, user);
         break;
       default:
