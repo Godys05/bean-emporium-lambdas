@@ -74,6 +74,15 @@ export const handler = async (
   event: APIGatewayProxyEvent,
   context: Context
 ): Promise<APIGatewayProxyResult> => {
+  // Endpoints to create:
+  // /users
+  //     POST
+  //     /{id}
+  //         GET
+  //         PATCH
+  //         /cart
+  //             GET
+  //             PUT
   let data: any = {};
   const method = event.httpMethod;
   let user;
