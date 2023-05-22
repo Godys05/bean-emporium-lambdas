@@ -2,11 +2,12 @@
   "dependencies": {
     "@types/aws-lambda": "^8.10.114",
     "aws-lambda": "^1.0.7",
-    "aws-sdk": "^2.1350.0"
+    "aws-sdk": "^2.1350.0",
+    "webpack-node-externals": "^3.0.0"
   },
   "devDependencies": {
     "ts-loader": "^9.4.2",
-    "webpack": "^5.78.0",
+    "webpack": "^5.83.1",
     "webpack-cli": "^5.0.1"
   },
   "scripts": {
