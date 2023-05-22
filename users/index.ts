@@ -116,6 +116,7 @@ const updateUser = async (id: string, userData: Partial<User>) => {
   return await getUser(id);
 };
 
+// Main lambda handler
 export const handler = async (
   event: APIGatewayProxyEvent,
   context: Context
