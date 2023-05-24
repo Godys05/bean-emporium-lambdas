@@ -55,7 +55,10 @@ const getProduct = async (id: string) => {
  * @param LastEvaluatedKey The key of the last item, which is used to get the next N items, starting from here.
  * @returns A promise with the response's message and the DynamoDB Item.
  */
-const getProducts = async (pageSize: number, LastEvaluatedKey?: any) => {
+const getProducts = async (
+  pageSize: number,
+  LastEvaluatedKey?: { id: string }
+) => {
   // Build params obj
   const params: { TableName: string; Limit: number; ExclusiveStartKey?: Key } =
     {
@@ -148,15 +151,25 @@ export const handler = async (
   try {
     // GET products method
     if (method === "GET" && scope === "products") {
+      const { pageSize, LastEvaluatedKey } = event.queryStringParameters as {
+        pageSize: string;
+        LastEvaluatedKey: string;
+      };
       // Get the the products
-      const products = await getProducts(1);
+      const products = await getProducts(
+        parseInt(pageSize),
+        LastEvaluatedKey
+          ? {
+              id: LastEvaluatedKey,
+            }
+          : undefined
+      );
 
       // Return method's response
       return {
         body: JSON.stringify({
-          products,
+          ...products,
           message: "Success",
-          event,
         }),
         statusCode: 200,
       };
@@ -209,20 +222,18 @@ export const handler = async (
         };
 
       // Create user
-      const user = await createProduct(product);
+      const newProduct = await createProduct(product);
 
       // Return method's response
       return {
-        body: JSON.stringify({ user: user, message: "Success" }),
+        body: JSON.stringify({ newProduct, message: "Success" }),
         statusCode: 200,
       };
 
       // PATCH method
     } else if (method === "PATCH" && scope === "product") {
       // Get data from body
-      const { newProductFields: newProductFields } = JSON.parse(
-        event.body!
-      ) as {
+      const { newProductFields } = JSON.parse(event.body!) as {
         newProductFields: Partial<Product>;
       };
 
