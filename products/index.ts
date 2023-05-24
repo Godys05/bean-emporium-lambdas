@@ -99,7 +99,7 @@ const createProduct = async (product: Product) => {
  * Update a product by id.
  * @param id The products's id.
  * @param productData The product's data.
- * @returns A promise with the uploaded product.
+ * @returns A promise with the updated product.
  */
 const updateProduct = async (id: string, productData: Partial<Product>) => {
   // Operation params.
