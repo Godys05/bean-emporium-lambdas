@@ -7,7 +7,7 @@ import {
 import * as AWS from "aws-sdk";
 
 // Local types
-import { Cart, Product, User } from "../types";
+import { Product } from "../types";
 import { Key } from "aws-sdk/clients/dynamodb";
 
 // Declaring aws clients
@@ -15,7 +15,7 @@ const docClient = new AWS.DynamoDB.DocumentClient();
 
 // Helper functions
 /**
- * Delete a product based on its userId.
+ * Delete a product based on its id.
  * @param id The product's id.
  * @returns An empty promise.
  */
@@ -31,7 +31,7 @@ const deleteProduct = async (id: string) => {
 };
 
 /**
- * Get a product based on its userId.
+ * Get a product based on its id.
  * @param id The product's id.
  * @returns A promise with the response's message and the DynamoDB Item.
  */
@@ -42,7 +42,7 @@ const getProduct = async (id: string) => {
     Key: { id },
   };
 
-  // Get user
+  // Get product
   const data = await docClient.get(params).promise();
 
   // Return value
@@ -91,7 +91,7 @@ const createProduct = async (product: Product) => {
   // Put product on table
   await docClient.put(params).promise();
 
-  // Return uploaded user
+  // Return uploaded product
   return product;
 };
 
@@ -129,7 +129,7 @@ const updateProduct = async (id: string, productData: Partial<Product>) => {
   // Perform update
   await docClient.update(params).promise();
 
-  // Return updated user
+  // Return updated product
   return await getProduct(id);
 };
 
@@ -144,7 +144,7 @@ export const handler = async (
   // Get the api path as an array.
   const pathAsArray = event.path.split("/");
 
-  // Get scope, to know if we're performing actions on the user or the cart
+  // Get scope, to know if we're performing actions on a single product or the whole table
   const scope: "products" | "product" =
     pathAsArray[pathAsArray.length - 1] === "products" ? "products" : "product";
 
@@ -221,7 +221,7 @@ export const handler = async (
           };'`,
         };
 
-      // Create user
+      // Create product
       const newProduct = await createProduct(product);
 
       // Return method's response
