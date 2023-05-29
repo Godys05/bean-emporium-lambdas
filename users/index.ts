@@ -13,6 +13,11 @@ import { Cart, User } from "../types";
 const docClient = new AWS.DynamoDB.DocumentClient();
 const userUpdatableProperties = ["name", "email", "cart"];
 
+// Headers for everything
+const headers = {
+  "Access-Control-Allow-Origin": "*",
+};
+
 // Helper functions
 /**
  * Get a user's cart based on their userId.
@@ -144,6 +149,7 @@ export const handler = async (
           message: "Success",
         }),
         statusCode: 200,
+        headers,
       };
 
       // GET user method
@@ -158,6 +164,7 @@ export const handler = async (
           message: "Success",
         }),
         statusCode: 200,
+        headers,
       };
 
       // POST Method
@@ -171,6 +178,7 @@ export const handler = async (
         return {
           statusCode: 400,
           body: "Please provide body in format '{ 'userData': { 'email':string, 'name':string, 'id':string } }'",
+          headers,
         };
 
       // Create user
@@ -180,6 +188,7 @@ export const handler = async (
       return {
         body: JSON.stringify({ user: user, message: "Success" }),
         statusCode: 200,
+        headers,
       };
 
       // PATCH method
@@ -199,12 +208,14 @@ export const handler = async (
         return {
           body: JSON.stringify({ cart: undefined, message: "User not found" }),
           statusCode: 404,
+          headers,
         };
 
       // Return method's response
       return {
         body: JSON.stringify({ cart: user.cart, message: "Success" }),
         statusCode: 200,
+        headers,
       };
     } else if (method === "PATCH" && scope === "user") {
       // Get data from body
@@ -219,14 +230,20 @@ export const handler = async (
       return {
         body: JSON.stringify({ user: user, message: "Success" }),
         statusCode: 200,
+        headers,
       };
     }
-    return { body: '{"message": "Not such endpoint"}', statusCode: 502 };
+    return {
+      body: '{"message": "Not such endpoint"}',
+      statusCode: 502,
+      headers,
+    };
   } catch (error) {
     console.log(error);
     return {
       body: `{"error": ${(error as Error).toString()}}`,
       statusCode: 502,
+      headers,
     };
   }
 };

@@ -13,6 +13,11 @@ import { Key } from "aws-sdk/clients/dynamodb";
 // Declaring aws clients
 const docClient = new AWS.DynamoDB.DocumentClient();
 
+// Headers for everything
+const headers = {
+  "Access-Control-Allow-Origin": "*",
+};
+
 // Helper functions
 /**
  * Delete a product based on its id.
@@ -172,6 +177,7 @@ export const handler = async (
           message: "Success",
         }),
         statusCode: 200,
+        headers,
       };
 
       // GET product method
@@ -186,6 +192,7 @@ export const handler = async (
           message: "Success",
         }),
         statusCode: 200,
+        headers,
       };
 
       // Create product method
@@ -219,6 +226,7 @@ export const handler = async (
               }[];
             }[];
           };'`,
+          headers,
         };
 
       // Create product
@@ -228,6 +236,7 @@ export const handler = async (
       return {
         body: JSON.stringify({ newProduct, message: "Success" }),
         statusCode: 200,
+        headers,
       };
 
       // PATCH method
@@ -251,12 +260,14 @@ export const handler = async (
             message: "Product not found",
           }),
           statusCode: 404,
+          headers,
         };
 
       // Return method's response
       return {
         body: JSON.stringify({ product: product, message: "Success" }),
         statusCode: 200,
+        headers,
       };
     } else if (method === "DELETE" && scope === "product") {
       // Perform deletion
@@ -266,14 +277,20 @@ export const handler = async (
       return {
         body: JSON.stringify({ message: "Success" }),
         statusCode: 200,
+        headers,
       };
     }
-    return { body: '{"message": "Not such endpoint"}', statusCode: 502 };
+    return {
+      body: '{"message": "Not such endpoint"}',
+      statusCode: 502,
+      headers,
+    };
   } catch (error) {
     console.log(error);
     return {
       body: `{"error": ${(error as Error).toString()}}`,
       statusCode: 502,
+      headers,
     };
   }
 };
