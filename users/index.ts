@@ -16,6 +16,10 @@ const userUpdatableProperties = ["name", "email", "cart"];
 // Headers for everything
 const headers = {
   "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Credentials": true,
+  "Access-Control-Allow-Methods": "OPTIONS, POST, GET, PATCH",
+  "Access-Control-Allow-Headers": "Content-Type",
+  "Content-Type": "application/json",
 };
 
 // Helper functions
@@ -186,7 +190,10 @@ export const handler = async (
 
       // Return method's response
       return {
-        body: JSON.stringify({ user: user, message: "Success" }),
+        body: JSON.stringify({
+          user,
+          message: "Success",
+        }),
         statusCode: 200,
         headers,
       };
