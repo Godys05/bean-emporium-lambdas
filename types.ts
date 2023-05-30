@@ -27,3 +27,21 @@ export type Product = {
     imgUrl: string;
   }[];
 };
+
+export type Order = {
+  id: string;
+  userId: string;
+  products: {
+    productId: string;
+    name: string;
+    variant: {
+      id: string;
+      name: string;
+      pricePerUnit: number;
+      imgUrl?: string;
+    },
+    quantity: number;
+    timestamp: number;
+  }[];
+  total: number;
+}
