@@ -48,7 +48,7 @@ def handler(event={}, context=None):
 def sendEmail(email, EMAIL_ADDRESS, EMAIL_PASSWORD):
     # Declare params
     msg = EmailMessage()
-    msg['Subject'] = "Oops, you didn't clicked purchase!"
+    msg['Subject'] = "Oops, you didn't click purchase!"
     msg['From'] = EMAIL_ADDRESS
     msg['To'] = email
     msg.set_content("You still have items in your cart, don't hesitate to complete the order!")
