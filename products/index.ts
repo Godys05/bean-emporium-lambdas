@@ -9,6 +9,7 @@ import * as AWS from "aws-sdk";
 // Local types
 import { Product } from "../types";
 import { Key } from "aws-sdk/clients/dynamodb";
+import { AttributeValue } from "aws-sdk/clients/dynamodb";
 
 // Declaring aws clients
 const docClient = new AWS.DynamoDB.DocumentClient();
@@ -58,27 +59,66 @@ const getProduct = async (id: string) => {
  * Get N products from last evaluated key.
  * @param pageSize The number of items to retrieve.
  * @param LastEvaluatedKey The key of the last item, which is used to get the next N items, starting from here.
+ * @param search A string used to evaluate the product's name to only return matching results.
  * @returns A promise with the response's message and the DynamoDB Item.
  */
 const getProducts = async (
   pageSize: number,
-  LastEvaluatedKey?: { id: string }
+  LastEvaluatedKey?: { id: string },
+  search?: string
 ) => {
-  // Build params obj
-  const params: { TableName: string; Limit: number; ExclusiveStartKey?: Key } =
-    {
-      TableName: "BeanProducts",
-      Limit: pageSize, // Maximum number of items to retrieve per page
-      ExclusiveStartKey: LastEvaluatedKey
-        ? (LastEvaluatedKey as Key)
-        : undefined,
+  // Build params object
+  const params: {
+    TableName: string;
+    Limit: number;
+    ExclusiveStartKey?: Key;
+    FilterExpression?: string;
+    ExpressionAttributeValues?: AWS.DynamoDB.DocumentClient.ExpressionAttributeValueMap;
+    ExpressionAttributeNames?: AWS.DynamoDB.DocumentClient.ExpressionAttributeNameMap;
+  } = {
+    TableName: "BeanProducts",
+    Limit: pageSize, // Maximum number of items to retrieve per page
+    ExclusiveStartKey: LastEvaluatedKey ? (LastEvaluatedKey as Key) : undefined,
+  };
+
+  if (search) {
+    // Add filter expression to match product name
+    params.FilterExpression = "contains(#name, :searchTerm)";
+    params.ExpressionAttributeValues = {
+      ":searchTerm": search,
     };
+    params.ExpressionAttributeNames = {
+      "#name": "name",
+    };
+  }
 
-  // Get products
-  const { Items: products, LastEvaluatedKey: lastEvaluatedKey } =
-    await docClient.scan(params).promise();
+  // Get products until reaching limit
+  let productsGot: Product[] = [];
+  while (true) {
+    // Get products
+    const { Items: products, LastEvaluatedKey: lastEvaluatedKey } =
+      await docClient.scan(params).promise();
+    productsGot.push(...(products as Product[]));
 
-  return { products, LastEvaluatedKey: lastEvaluatedKey };
+    // Remove non-requested items
+    if (productsGot.length > pageSize) {
+      productsGot.splice(pageSize, productsGot.length - pageSize);
+      return { products: productsGot, LastEvaluatedKey: undefined };
+    }
+
+    // Return success when matching numbers
+    if (productsGot.length === pageSize)
+      return { products: productsGot, LastEvaluatedKey: lastEvaluatedKey };
+
+    // Return success when no more items
+    if (!lastEvaluatedKey)
+      return { products: productsGot, LastEvaluatedKey: undefined };
+
+    // Update start to continue fetching
+    params.ExclusiveStartKey = {
+      id: productsGot[productsGot.length - 1].id as AttributeValue,
+    };
+  }
 };
 
 /**
@@ -156,10 +196,12 @@ export const handler = async (
   try {
     // GET products method
     if (method === "GET" && scope === "products") {
-      const { pageSize, LastEvaluatedKey } = event.queryStringParameters as {
-        pageSize: string;
-        LastEvaluatedKey: string;
-      };
+      const { pageSize, LastEvaluatedKey, search } =
+        event.queryStringParameters as {
+          pageSize: string;
+          LastEvaluatedKey: string;
+          search: string | undefined;
+        };
       // Get the the products
       const products = await getProducts(
         parseInt(pageSize),
@@ -167,7 +209,8 @@ export const handler = async (
           ? {
               id: LastEvaluatedKey,
             }
-          : undefined
+          : undefined,
+        search
       );
 
       // Return method's response
